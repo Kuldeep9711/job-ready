@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 
 interface JobApplication {
@@ -12,10 +12,27 @@ interface JobApplication {
 }
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [company, setCompany] = useState("");
-  const [position, setPosition] = useState("");
-  const [status, setStatus] = useState("Applied");
+ const [applications, setApplications] = useState<JobApplication[]>([]);
+const [company, setCompany] = useState("");
+const [position, setPosition] = useState("");
+const [status, setStatus] = useState("Applied");
+const [isLoaded, setIsLoaded] = useState(false);
+
+// Load data only on the client after the page is mounted
+useEffect(() => {
+  const saved = localStorage.getItem("job-applications");
+  if (saved) {
+    setApplications(JSON.parse(saved));
+  }
+  setIsLoaded(true);
+}, []);
+
+// Save data whenever applications change
+useEffect(() => {
+  if (isLoaded) {
+    localStorage.setItem("job-applications", JSON.stringify(applications));
+  }
+}, [applications, isLoaded]);
 
   const handleAddApplication = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +57,11 @@ export default function ApplicationsPage() {
     setPosition("");
     setStatus("Applied");
   };
+
+  const handleDelete = (id: number) => {
+  const updated = applications.filter((app) => app.id !== id);
+  setApplications(updated);
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,7 +121,9 @@ export default function ApplicationsPage() {
 
         {/* Applications List */}
         <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-          {applications.length === 0 ? (
+          {!isLoaded ? (
+  <div className="p-8 text-center text-gray-500">Loading...</div>
+) : applications.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               No applications added yet.
             </div>
@@ -119,6 +143,9 @@ export default function ApplicationsPage() {
                   <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">
                     Date
                   </th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -127,6 +154,7 @@ export default function ApplicationsPage() {
       <td className="px-6 py-4 font-medium text-gray-800">{app.company}</td>
       <td className="px-6 py-4 text-gray-800">{app.position}</td>
       <td className="px-6 py-4">
+
         <span
   className={`px-3 py-1 rounded-full text-sm font-medium
     ${
@@ -144,6 +172,16 @@ export default function ApplicationsPage() {
 </span>
       </td>
       <td className="px-6 py-4 text-gray-500">{app.date}</td>
+
+    <td className="px-6 py-4">
+  <button
+    onClick={() => handleDelete(app.id)}
+    className="text-red-500 hover:text-red-700 text-sm font-medium"
+  >
+    Delete
+  </button>
+</td>
+
     </tr>
   ))}
 </tbody>
