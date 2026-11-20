@@ -63,6 +63,13 @@ useEffect(() => {
   setApplications(updated);
 };
 
+const handleStatusChange = (id: number, newStatus: string) => {
+  const updated = applications.map((app) =>
+    app.id === id ? { ...app, status: newStatus } : app
+  );
+  setApplications(updated);
+};
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -153,24 +160,28 @@ useEffect(() => {
     <tr key={app.id} className="border-b hover:bg-gray-50">
       <td className="px-6 py-4 font-medium text-gray-800">{app.company}</td>
       <td className="px-6 py-4 text-gray-800">{app.position}</td>
-      <td className="px-6 py-4">
-
-        <span
-  className={`px-3 py-1 rounded-full text-sm font-medium
-    ${
-      app.status === "Applied"
-        ? "bg-blue-100 text-blue-700"
-        : app.status === "Interview"
-        ? "bg-yellow-100 text-yellow-700"
-        : app.status === "Offer"
-        ? "bg-green-100 text-green-700"
-        : "bg-red-100 text-red-700"
-    }
-  `}
->
-  {app.status}
-</span>
-      </td>
+     <td className="px-6 py-4">
+  <select
+    value={app.status}
+    onChange={(e) => handleStatusChange(app.id, e.target.value)}
+    className={`px-3 py-1 rounded-full text-sm font-medium border-0 cursor-pointer
+      ${
+        app.status === "Applied"
+          ? "bg-blue-100 text-blue-700"
+          : app.status === "Interview"
+          ? "bg-yellow-100 text-yellow-700"
+          : app.status === "Offer"
+          ? "bg-green-100 text-green-700"
+          : "bg-red-100 text-red-700"
+      }
+    `}
+  >
+    <option value="Applied">Applied</option>
+    <option value="Interview">Interview</option>
+    <option value="Offer">Offer</option>
+    <option value="Rejected">Rejected</option>
+  </select>
+</td>
       <td className="px-6 py-4 text-gray-500">{app.date}</td>
 
     <td className="px-6 py-4">
