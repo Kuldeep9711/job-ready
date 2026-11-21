@@ -17,6 +17,13 @@ const [company, setCompany] = useState("");
 const [position, setPosition] = useState("");
 const [status, setStatus] = useState("Applied");
 const [isLoaded, setIsLoaded] = useState(false);
+const [search, setSearch] = useState("");
+
+const filteredApplications = applications.filter(
+  (app) =>
+    app.company.toLowerCase().includes(search.toLowerCase()) ||
+    app.position.toLowerCase().includes(search.toLowerCase())
+);
 
 // Load data only on the client after the page is mounted
 useEffect(() => {
@@ -68,6 +75,10 @@ const handleStatusChange = (id: number, newStatus: string) => {
     app.id === id ? { ...app, status: newStatus } : app
   );
   setApplications(updated);
+};
+
+const handleClearAll = () => {
+  setApplications([]);
 };
 
   return (
@@ -126,11 +137,29 @@ const handleStatusChange = (id: number, newStatus: string) => {
           </form>
         </div>
 
+       {/* Search + Clear All */}
+<div className="flex flex-col sm:flex-row gap-3 mb-4 justify-between">
+  <input
+    type="text"
+    placeholder="Search by company or position..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="w-full sm:w-80 border border-gray-300 rounded-lg px-4 py-2 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+
+  <button
+    onClick={handleClearAll}
+    className="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition"
+  >
+    Clear All
+  </button>
+</div>
+
         {/* Applications List */}
         <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
           {!isLoaded ? (
   <div className="p-8 text-center text-gray-500">Loading...</div>
-) : applications.length === 0 ? (
+) : filteredApplications.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               No applications added yet.
             </div>
@@ -156,7 +185,7 @@ const handleStatusChange = (id: number, newStatus: string) => {
                 </tr>
               </thead>
               <tbody>
-  {applications.map((app) => (
+ {filteredApplications.map((app) => (
     <tr key={app.id} className="border-b hover:bg-gray-50">
       <td className="px-6 py-4 font-medium text-gray-800">{app.company}</td>
       <td className="px-6 py-4 text-gray-800">{app.position}</td>
