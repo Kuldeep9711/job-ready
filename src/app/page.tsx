@@ -30,54 +30,56 @@ export default function Home() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
 
       <main className="max-w-6xl mx-auto px-4 py-10">
-        {/* Welcome Section */}
         <div className="mb-10">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
             Welcome back, Kuldeep
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Track your job applications and practice for interviews.
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {/* Card 1 */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            <h3 className="text-gray-500 text-sm font-medium mb-1">Total Applications</h3>
-            <p className="text-3xl font-bold text-gray-800">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+              Total Applications
+            </h3>
+            <p className="text-3xl font-bold text-gray-800 dark:text-white">
               {isLoaded ? total : "-"}
             </p>
           </div>
 
-          {/* Card 2 */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            <h3 className="text-gray-500 text-sm font-medium mb-1">Interviews</h3>
-            <p className="text-3xl font-bold text-gray-800">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+              Interviews
+            </h3>
+            <p className="text-3xl font-bold text-gray-800 dark:text-white">
               {isLoaded ? interviews : "-"}
             </p>
           </div>
 
-          {/* Card 3 */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            <h3 className="text-gray-500 text-sm font-medium mb-1">Pending</h3>
-            <p className="text-3xl font-bold text-gray-800">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+              Pending
+            </h3>
+            <p className="text-3xl font-bold text-gray-800 dark:text-white">
               {isLoaded ? pending : "-"}
             </p>
           </div>
         </div>
 
-        {/* Coming Soon Section */}
-        <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200 text-center">
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 text-center">
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
             Keep Going!
           </h3>
-          <p className="text-gray-600">
-            You have applied to <span className="font-semibold">{total}</span> jobs so far.
+          <p className="text-gray-600 dark:text-gray-400">
+            You have applied to{" "}
+            <span className="font-semibold text-gray-800 dark:text-white">{total}</span> jobs
+            so far.
           </p>
         </div>
       </main>
