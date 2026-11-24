@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
+import Link from "next/link";
 
 const questions = [
   "Tell me about yourself.",
@@ -28,7 +29,11 @@ export default function PracticePage() {
   const [answer, setAnswer] = useState("");
   const [savedAnswers, setSavedAnswers] = useState<SavedAnswer[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+
+  // AI states
+  const [feedback, setFeedback] = useState("");
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem("practice-answers");
@@ -48,6 +53,8 @@ export default function PracticePage() {
     const randomIndex = Math.floor(Math.random() * questions.length);
     setCurrentQuestion(questions[randomIndex]);
     setAnswer("");
+    setFeedback("");
+    setAiError("");
   };
 
   const handleSaveAnswer = () => {
@@ -65,10 +72,43 @@ export default function PracticePage() {
 
     setSavedAnswers([newAnswer, ...savedAnswers]);
     setAnswer("");
+    setFeedback("");
   };
 
-  const handleDeleteAnswer = (id: number) => {
-    setSavedAnswers(savedAnswers.filter((item) => item.id !== id));
+  const handleGetAIFeedback = async () => {
+    if (!answer.trim()) {
+      alert("Please write an answer first");
+      return;
+    }
+
+    setIsLoadingAI(true);
+    setFeedback("");
+    setAiError("");
+
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: currentQuestion,
+          answer: answer,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to get feedback");
+      }
+
+      setFeedback(data.feedback);
+    } catch (error: any) {
+      setAiError(error.message || "Something went wrong");
+    } finally {
+      setIsLoadingAI(false);
+    }
   };
 
   return (
@@ -83,96 +123,97 @@ export default function PracticePage() {
               Practice
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Improve your interview skills
+              Improve your interview skills with AI feedback
             </p>
           </div>
 
-          <button
-            onClick={() => setShowHistory(!showHistory)}
+          <Link
+            href="/practice/history"
             className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
           >
-            {showHistory ? "Back to Practice" : `History (${savedAnswers.length})`}
-          </button>
+            History ({savedAnswers.length})
+          </Link>
         </div>
 
-        {!showHistory ? (
-          <div className="space-y-5">
-            {/* Question Card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Current Question
-              </p>
-              <p className="text-xl font-semibold text-gray-900 dark:text-white leading-relaxed">
-                {currentQuestion}
-              </p>
-            </div>
-
-            {/* Answer Card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-                Your Answer
-              </p>
-              <textarea
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                rows={5}
-                placeholder="Write your answer here as if you're in a real interview..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              />
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleSaveAnswer}
-                className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium py-3 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition"
-              >
-                Save Answer
-              </button>
-              <button
-                onClick={getRandomQuestion}
-                className="flex-1 bg-blue-600 text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition"
-              >
-                Next Question
-              </button>
-            </div>
+        <div className="space-y-5">
+          {/* Question Card */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+              Current Question
+            </p>
+            <p className="text-xl font-semibold text-gray-900 dark:text-white leading-relaxed">
+              {currentQuestion}
+            </p>
           </div>
-        ) : (
-          /* History */
-          <div className="space-y-4">
-            {savedAnswers.length === 0 ? (
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center text-gray-500 dark:text-gray-400">
-                No answers saved yet
-              </div>
-            ) : (
-              savedAnswers.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm"
+
+          {/* Answer Card */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+              Your Answer
+            </p>
+            <textarea
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              rows={5}
+              placeholder="Write your answer here as if you're in a real interview..."
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
+
+          {/* AI Feedback */}
+          {aiError && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-2xl p-4 text-sm">
+              {aiError}
+            </div>
+          )}
+
+          {feedback && (
+            <div className="bg-white dark:bg-gray-900 border border-purple-300 dark:border-purple-700 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                  AI Feedback
+                </p>
+                <button
+                  onClick={() => setFeedback("")}
+                  className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {item.question}
-                    </p>
-                    <button
-                      onClick={() => handleDeleteAnswer(item.id)}
-                      className="text-sm text-red-500 hover:text-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-2 leading-relaxed">
-                    {item.answer}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {item.date}
-                  </p>
-                </div>
-              ))
-            )}
+                  Close
+                </button>
+              </div>
+              <div className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">
+                {feedback}
+              </div>
+            </div>
+          )}
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleGetAIFeedback}
+              disabled={isLoadingAI}
+              className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white font-medium py-3 rounded-xl transition"
+            >
+              {isLoadingAI ? "Getting AI Feedback..." : "Get AI Feedback"}
+            </button>
+
+            <button
+              onClick={handleSaveAnswer}
+              className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium py-3 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition"
+            >
+              Save Answer
+            </button>
+
+            <button
+              onClick={getRandomQuestion}
+              className="flex-1 bg-blue-600 text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition"
+            >
+              Next Question
+            </button>
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
 }
+
+
